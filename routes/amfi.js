@@ -31,6 +31,33 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/schemes/:schemeCode", async (req, res) => {
+  const url = "https://www.amfiindia.com/spages/NAVAll.txt";
+  try {
+    const response = await fetch(url);
+    const body = await response.text();
+    let fundData = parseData(body);
+
+    const schemeCode = req.params.schemeCode;
+
+    const result = fundData.find((fund) => fund["Scheme Code"] === schemeCode);
+
+    if (!result) {
+      return res.status(404).json({ error: "Scheme code not found" });
+    }
+
+    // Create object with only schemeCode and schemeName fields
+    const obj = {
+      schemeCode: result["Scheme Code"],
+      schemeName: result["Scheme Name"],
+    };
+
+    return res.json(obj);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch data" });
+  }
+});
+
 // Get funds by date range, mf, and one or more schemeCodes as query params
 router.get("/history", async (req, res) => {
   const { startDate, endDate, mf, schemeCodes } = req.query;
