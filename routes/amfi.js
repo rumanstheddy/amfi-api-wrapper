@@ -31,6 +31,35 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/nav/latest", async (req, res) => {
+  const url = "https://www.amfiindia.com/spages/NAVAll.txt?t=1";
+  try {
+    const response = await fetch(url);
+    const body = await response.text();
+    let fundData = parseData(body);
+
+    return res.json(fundData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch data" });
+  }
+});
+
+router.get("/nav/latest/:schemeCode", async (req, res) => {
+  const url = "https://www.amfiindia.com/spages/NAVAll.txt?t=1";
+  try {
+    const response = await fetch(url);
+    const body = await response.text();
+    let fundData = parseData(body);
+
+    const schemeCode = req.params.schemeCode;
+    const result = fundData.find((fund) => fund["Scheme Code"] === schemeCode);
+
+    return res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch data" });
+  }
+});
+
 router.get("/schemes/:schemeCode", async (req, res) => {
   const url = "https://www.amfiindia.com/spages/NAVAll.txt";
   try {
@@ -39,6 +68,10 @@ router.get("/schemes/:schemeCode", async (req, res) => {
     let fundData = parseData(body);
 
     const schemeCode = req.params.schemeCode;
+
+    if (!schemeCode) {
+      return res.status(400).json({ error: "schemeCode parameter is required" });
+    }
 
     const result = fundData.find((fund) => fund["Scheme Code"] === schemeCode);
 
